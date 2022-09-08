@@ -1,0 +1,62 @@
+---
+title: "stat447_project"
+author: "Jinhao Zhong"
+date: "2021/11/10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+library("randomForest")
+```
+
+
+read data
+```{r warning=FALSE, message=FALSE}
+rm(list = ls())
+# reading data
+traindata <- get(load("train.rda"))
+head(traindata)
+testdata <- get(load("test.rda"))
+head(testdata,2)
+# check the characteristics of the data
+table(traindata[,13])
+# create a new data set by deleting  COPD, Cancer, Patid from traindata
+mytrain=traindata[-6][-6][-6][-506]
+mytrain$case=traindata$AsthmaStatus
+mytrain=data.frame(mytrain)
+# check the new data set
+names(mytrain)
+```
+
+T test
+```{r warning=FALSE, message=FALSE}
+myresult=rep(NA,505)
+for (ii in 1:505) {
+  myresult[ii]=t.test(mytrain[,ii]~mytrain$case)$p.value
+}
+sig=which(myresult<(0.05/505))
+# result of t-test
+sig
+```
+
+random forest
+```{r warning=FALSE, message=FALSE}
+#input sig col
+randfor_data = data.frame(mytrain[,c(1,2,3,5,47,78,120:138,194:196,255:259,401:403,407:423)])
+
+randfor_data
+
+# run random forest
+randfor = randomForest(mytrain$case~., data = randfor_data, importance = TRUE)
+  
+randfor
+```
+
+
+
+
